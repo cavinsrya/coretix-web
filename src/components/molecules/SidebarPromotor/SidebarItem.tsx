@@ -19,13 +19,8 @@ import Link from "next/link";
 // import Button from "../atoms/Button";
 import Logo from "../../atoms/Logo";
 
-export default function SidebarItem({
-  collapsed,
-  setCollapsed,
-}: {
-  collapsed: boolean;
-  setCollapsed: (val: boolean) => void;
-}) {
+export default function SidebarItem() {
+  const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const menuItems = [
     {

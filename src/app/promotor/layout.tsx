@@ -57,23 +57,14 @@ export default function PromoterLayout({
   //   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      <SidebarPromotor collapsed={collapsed} setCollapsed={setCollapsed} />
-      <div
-        className={`transition-all duration-300 flex-1 pt-0 lg:pt-6 pb-6 ${
-          collapsed ? "ml-20" : "ml-64"
-        }`}
-      >
+    <div className="min-h-screen bg-[#f5f7fa]">
+      {/* Promoter Sidebar */}
+      <SidebarPromotor />
+
+      {/* Main Content */}
+      <div className="lg:ml-64 pt-0 lg:pt-6 pb-6">
         <div className="container mx-auto px-4">{children}</div>
       </div>
     </div>
-    // <div className="min-h-screen bg-[#f5f7fa]">
-    // {/* Promoter Sidebar */}
-    // <PromoterSidebar />
-
-    // {/* Main Content */}
-    // <div className="lg:ml-64 pt-0 lg:pt-6 pb-6">
-    //   <div className="container mx-auto px-4">{children}</div>
-    // </div>
   );
 }

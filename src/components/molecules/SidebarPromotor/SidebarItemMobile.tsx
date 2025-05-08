@@ -65,7 +65,7 @@ export default function SidebarItemMobile() {
       {/* Mobile Sidebar (Drawer) */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 z-20 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-20 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         >
           <div
@@ -83,7 +83,7 @@ export default function SidebarItemMobile() {
                 />
               </div>
               <div className="text-center">
-                <p className="text-white font-medium">Ismaya Group</p>
+                <p className="text-white font-medium">Ismaya</p>
                 <p className="text-[#86e64c] text-sm">Promoter</p>
               </div>
             </div>
@@ -105,7 +105,10 @@ export default function SidebarItemMobile() {
                 </Link>
               ))}
 
-              <button className="flex items-center gap-3 py-3 px-4 mb-1 rounded-md w-full text-left text-red-300 hover:bg-[#ffffff11] hover:text-red-200">
+              <button
+                className="flex items-center gap-3 py-3 px-4 mb-1 rounded-md w-full text-left text-red-300 hover:bg-[#ffffff11] hover:text-red-200"
+                // onClick={() => setIsLogoutConfirmOpen(true)}
+              >
                 <LogOut className="w-5 h-5" />
                 <span>Logout</span>
               </button>

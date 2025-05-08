@@ -4,7 +4,7 @@ import { Plus } from "lucide-react";
 
 export function EventHeader() {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-2 sm:gap-0">
+    <div className="flex justify-between items-center mb-6">
       <h1 className="text-2xl font-bold">Event Saya</h1>
       <Link
         href="/promoter/events/create"

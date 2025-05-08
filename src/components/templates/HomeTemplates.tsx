@@ -1,8 +1,10 @@
+import React from "react";
 import Header from "@/components/organisms/Header";
 import Carousel from "@/components/organisms/Carousel";
 import Categories from "@/components/organisms/Categories";
 import EventSection from "@/components/organisms/EventSection";
 import Footer from "@/components/organisms/Footer";
+import "swiper/css";
 
 type HomeTemplateProps = {
   carouselSlides: Array<{
@@ -11,18 +13,24 @@ type HomeTemplateProps = {
     title: string;
   }>;
   upcomingEvents: Array<{
+    id: number; // ubah dari string ke number
+    imageUrl: string;
     title: string;
     date: string;
     venue: string;
     price: string;
   }>;
   latestGigs: Array<{
+    id: number;
+    imageUrl: string;
     title: string;
     date: string;
     venue: string;
     price: string;
   }>;
   popularEvents: Array<{
+    id: number;
+    imageUrl: string;
     title: string;
     date: string;
     venue: string;
@@ -41,7 +49,7 @@ export default function HomeTemplate({
       <Header />
       <main className="flex-grow">
         <div className="container mx-auto px-4 py-8">
-          <Carousel slides={carouselSlides} autoSlideInterval={3000} />
+          <Carousel slides={carouselSlides} />
           <Categories />
           <EventSection title="Upcoming Events" events={upcomingEvents} />
           <EventSection title="Gigs Terbaru" events={latestGigs} />

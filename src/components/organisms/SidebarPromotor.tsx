@@ -1,26 +1,22 @@
-"use client";
-
 import React from "react";
-import SidebarItemMobile from "../molecules/SidebarPromotor/SidebarItemMobile";
 import SidebarItem from "../molecules/SidebarPromotor/SidebarItem";
+import SidebarItemMobile from "../molecules/SidebarPromotor/SidebarItemMobile";
 
-export default function SidebarPromotor({
-  collapsed,
-  setCollapsed,
-}: {
-  collapsed: boolean;
-  setCollapsed: (val: boolean) => void;
-}) {
+type Props = {
+  isOpen: boolean;
+};
+
+export default function SidebarPromotor() {
   return (
     <>
       {/* Tampil hanya di mobile (sm:) */}
-      <div className="block sm:hidden">
+      <div className="block lg:hidden">
         <SidebarItemMobile />
       </div>
 
       {/* Tampil hanya di desktop */}
       <div className="hidden sm:block">
-        <SidebarItem collapsed={collapsed} setCollapsed={setCollapsed} />
+        <SidebarItem />
       </div>
     </>
   );

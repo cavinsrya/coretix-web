@@ -1,28 +1,21 @@
 import Heading from "../atoms/Heading";
 import CategoryCard from "../molecules/CategoryCard";
-
-const CATEGORIES = [
-  "Sports",
-  "Fashion",
-  "Community",
-  "Theater",
-  "Gigs",
-  "Holiday",
-  "Conference",
-  "Education",
-];
+import Text from "../atoms/Text";
 
 export default function Categories() {
   return (
-    <section className="mb-8">
-      <Heading level={2} className="mb-4">
+    <section className="mb-4">
+      <Text
+        className="my-4"
+        weight="black"
+        color="default"
+        fontFamily="sans"
+        size="xxl"
+      >
         Categories
-      </Heading>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {CATEGORIES.map((category) => (
-          <CategoryCard key={category} name={category} />
-        ))}
-      </div>
+      </Text>
+
+      <CategoryCard />
     </section>
   );
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
 import {
   Calendar,
@@ -10,20 +9,36 @@ import {
   Ticket,
   Tag,
 } from "lucide-react";
-import { Icon } from "@/components/atoms/Icon";
-import { EventStats } from "@/components/molecules/SidebarPromotor/EventStats";
-import { ActionButton } from "@/components/molecules/SidebarPromotor/ActionButton";
+import Button from "@/components/atoms/Button";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export function EventCard({
-  event,
-  onDelete,
-}: {
-  event: any;
+type EventProps = {
+  event: {
+    id: string;
+    title: string;
+    banner: string;
+    date: string;
+    time: string;
+    location: string;
+    category: string;
+    ticketsSold: number;
+    totalTickets: number;
+    revenue: number;
+  };
   onDelete: (id: string) => void;
-}) {
+};
+
+export default function EventCardList({ event, onDelete }: EventProps) {
+  const router = useRouter();
+  const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
+    null
+  );
+
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-      <div className="relative w-full aspect-[3/1]">
+      <div className="relative h-48 w-full">
         <Image
           src={event.banner || "/placeholder.svg"}
           alt={event.title}
@@ -31,59 +46,70 @@ export function EventCard({
           className="object-cover"
         />
       </div>
-
       <div className="p-4">
-        <h3 className="font-bold text-base sm:text-lg mb-2 truncate">
-          {event.title}
-        </h3>
-
+        <h3 className="font-bold text-lg mb-2 truncate">{event.title}</h3>
         <div className="space-y-2 mb-4">
-          <Icon icon={Calendar} text={event.date} />
-          <Icon icon={Clock} text={event.time} />
-          <Icon icon={MapPin} text={event.location} />
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Calendar className="h-4 w-4 text-[#050557] flex-shrink-0" />
+            <span>{event.date}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Clock className="h-4 w-4 text-[#050557] flex-shrink-0" />
+            <span>{event.time}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <MapPin className="h-4 w-4 text-[#050557] flex-shrink-0" />
+            <span className="truncate">{event.location}</span>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
-          <EventStats
-            label="Tiket Terjual"
-            value={`${event.ticketsSold}/${event.totalTickets}`}
-          />
-          <EventStats
-            label="Pendapatan"
-            value={`Rp ${(event.revenue / 1000000).toFixed(1)}jt`}
-          />
+        {/* Stats */}
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          <div className="bg-gray-50 p-2 rounded">
+            <p className="text-xs text-gray-500">Tiket Terjual</p>
+            <p className="font-bold">
+              {event.ticketsSold}/{event.totalTickets}
+            </p>
+          </div>
+          <div className="bg-gray-50 p-2 rounded">
+            <p className="text-xs text-gray-500">Pendapatan</p>
+            <p className="font-bold">
+              Rp {(event.revenue / 1000000).toFixed(1)}jt
+            </p>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Link
-            href={`/promoter/events/edit/${event.id}`}
-            className="bg-gray-100 text-gray-700 font-medium py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
+        <div className="flex gap-2">
+          <Button
+            href={`/promoter/events/edit/editEvent`}
+            className="flex-1 border-2 border-amber-300 text-amber-300 font-medium py-2 rounded-md hover:bg-gray-200 transition-colors flex items-center justify-center gap-1"
           >
             <Edit className="h-4 w-4" />
             Edit Event
-          </Link>
-          <ActionButton
-            icon={Trash2}
-            text="Delete"
-            className="bg-red-500 text-white hover:bg-red-100"
+          </Button>
+          <Button
             onClick={() => onDelete(event.id)}
-          />
+            className="flex-1 border-2 border-red-600 text-red-600 font-medium py-2 rounded-md hover:bg-red-100 transition-colors flex items-center justify-center gap-1"
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
-          <Link
+        <div className="grid grid-cols-2 gap-2 mt-2">
+          <Button
             href={`/promoter/events/tickets/${event.id}`}
-            className="bg-blue-50 text-blue-600 font-medium py-2 rounded-md hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
+            className="border-2 border-blue-600 text-blue-600 font-medium py-2 rounded-md hover:bg-blue-100 transition-colors flex items-center justify-center gap-1"
           >
             <Ticket className="h-4 w-4" />
             Kelola Tiket
-          </Link>
-          <Link
+          </Button>
+          <Button
             href={`/promoter/events/vouchers/${event.id}`}
-            className="bg-green-50 text-green-600 font-medium py-2 rounded-md hover:bg-green-100 transition-colors flex items-center justify-center gap-1"
+            className="border-2 border-green-600 text-green-600 font-medium py-2 rounded-md hover:bg-green-100 transition-colors flex items-center justify-center gap-1"
           >
             <Tag className="h-4 w-4" />
             Kelola Voucher
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import Logo from "../atoms/Logo";
 import Heading from "../atoms/Heading";
-import Text from "../atoms/Teks";
+import Text from "../atoms/Text";
 import ContactItem from "../molecules/ContactItem";
 
 export default function Footer() {

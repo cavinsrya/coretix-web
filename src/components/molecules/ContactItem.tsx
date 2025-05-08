@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import Text from "../atoms/Teks";
+import Text from "../atoms/Text";
 
 type ContactItemProps = {
   icon: ReactNode;

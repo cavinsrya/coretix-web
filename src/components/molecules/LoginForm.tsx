@@ -2,7 +2,7 @@
 
 import Input from "../atoms/Input";
 import Button from "../atoms/Button";
-import Text from "../atoms/Teks";
+import Text from "../atoms/Text";
 import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
 import { loginSchema } from "@/lib/validations/auth"; // Import schema
@@ -42,12 +42,13 @@ export default function LoginForm() {
     // BackEnd Simulation here
     try {
       const data = await loginUser(email, password);
-      const { token, role } = data;
-      // Simpan token dan redirect
-      localStorage.setItem("token", token);
+      const { access_token, name, role } = data;
+
+      localStorage.setItem("token", access_token);
       localStorage.setItem("role", role);
+      localStorage.setItem("name", name);
+
       toast.success("Login berhasil!");
-      console.log(role);
       if (role === "ORGANIZER") {
         window.location.href = "/promotor/dashboard";
       } else {
@@ -162,7 +163,7 @@ export default function LoginForm() {
               type="submit"
               variant="accent"
               className="w-full py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors justify-center"
-              onClick={undefined} // karena pakai form onSubmit
+              onClick={undefined}
               disabled={loading}
             >
               {" "}

@@ -1,61 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React from "react";
+import { useState } from "react";
 import { EventListTemplate } from "@/components/templates/EventDashboard";
-import { EventType } from "@/lib/types/type";
 
-export default function EventsPage() {
-  // State management
-  const [events, setEvents] = useState<EventType[]>([]);
+const dummyEvents = [
+  {
+    id: "1",
+    title: "Jakarta Music Festival 2025",
+    banner: "/placeholder.svg?height=200&width=350",
+    date: "12 Jun - 14 Jun 2025",
+    time: "18:00 - 23:00 WIB",
+    location: "Gelora Bung Karno, Jakarta",
+    category: "Music",
+    ticketsSold: 245,
+    totalTickets: 500,
+    revenue: 123500000,
+  },
+  {
+    id: "2",
+    title: "Business Summit 2025",
+    banner: "/placeholder.svg?height=200&width=350",
+    date: "25 Jul 2025",
+    time: "09:00 - 17:00 WIB",
+    location: "JCC Senayan, Jakarta",
+    category: "Conference",
+    ticketsSold: 188,
+    totalTickets: 300,
+    revenue: 94000000,
+  },
+];
+
+export default function EventDashboardPage() {
+  const [events, setEvents] = useState(dummyEvents);
   const [deleteConfirmation, setDeleteConfirmation] = useState<string | null>(
     null
   );
 
-  // Fetch initial data
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        // Ganti dengan API call sebenarnya
-        const mockEvents: EventType[] = [
-          {
-            id: "1",
-            title: "Konser Band Example",
-            date: "15 Agustus 2024",
-            time: "19:00 WIB",
-            location: "Gelora Bung Karno, Jakarta",
-            ticketsSold: 150,
-            totalTickets: 500,
-            revenue: 75000000,
-          },
-        ];
-        setEvents(mockEvents);
-      } catch (error) {
-        console.error("Failed to fetch events:", error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  // Handle delete event
-  const handleDelete = async (eventId: string) => {
-    try {
-      // Ganti dengan API delete call
-      console.log("Deleting event:", eventId);
-      setEvents((prev) => prev.filter((event) => event.id !== eventId));
-    } catch (error) {
-      console.error("Failed to delete event:", error);
-    }
+  const handleDelete = (id: string) => {
+    setEvents((prev) => prev.filter((event) => event.id !== id));
+    setDeleteConfirmation(null);
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-      <EventListTemplate
-        events={events}
-        deleteConfirmation={deleteConfirmation}
-        setDeleteConfirmation={setDeleteConfirmation}
-        handleDelete={handleDelete}
-      />
-    </div>
+    <EventListTemplate
+      events={events}
+      deleteConfirmation={deleteConfirmation}
+      setDeleteConfirmation={setDeleteConfirmation}
+      handleDelete={handleDelete}
+    />
   );
 }
