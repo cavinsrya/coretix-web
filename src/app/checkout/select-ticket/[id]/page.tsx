@@ -1,4 +1,3 @@
-// pages/checkout/select-ticket/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,16 +6,15 @@ import { CheckoutTemplate } from "@/components/templates/checkout-template";
 import { TicketSelection } from "@/components/organisms/Checkout/organisms/ticket-selection";
 import { OrderSummary } from "@/components/organisms/Checkout/organisms/order-summary";
 import { getEventDetails } from "@/lib/api/axios";
+import { useParams } from "next/navigation";
 
-export default function SelectTicketPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function SelectTicketPage() {
   const router = useRouter();
+  const params = useParams();
+  const eventId = Array.isArray(params.id) ? params.id[0] : params.id; // Pastikan ID adalah string
   const [loading, setLoading] = useState(true);
   const [eventData, setEventData] = useState<any>({
-    id: params.id,
+    id: eventId || "",
     title: "",
     date: "",
     location: "",
@@ -33,7 +31,9 @@ export default function SelectTicketPage({
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const event = await getEventDetails(params.id);
+        if (!eventId) return;
+
+        const event = await getEventDetails(eventId); // ID sudah dipastikan string
         setEventData({
           id: event.id,
           title: event.title,
@@ -52,7 +52,7 @@ export default function SelectTicketPage({
     };
 
     fetchEvent();
-  }, [params.id]);
+  }, [eventId]);
 
   const handleSelectTicketType = (ticketId: number) => {
     setSelectedTicketType(ticketId);
@@ -77,7 +77,7 @@ export default function SelectTicketPage({
     }
 
     router.push(
-      `/checkout/personal-information/${params.id}?type=${selectedTicketType}&qty=${quantity}`
+      `/checkout/personal-information/${eventId}?type=${selectedTicketType}&qty=${quantity}`
     );
   };
 
@@ -113,7 +113,7 @@ export default function SelectTicketPage({
             quantity={quantity}
             ticketPrice={totalPrice}
             totalPrice={totalPrice}
-            previousLink={`/event/${params.id}`}
+            previousLink={`/event/${eventId}`}
             onContinue={handleContinue}
             continueText="Beli Tiket"
           />

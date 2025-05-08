@@ -1,4 +1,3 @@
-// hooks/useAuth.ts
 "use client";
 import { useEffect, useState } from "react";
 
@@ -10,10 +9,11 @@ export function useAuth() {
     setIsAuthenticated(!!token);
   }, []);
 
-  const login = (token: string, name: string, role: string) => {
+  const login = (token: string, name: string, role: string, userId: string) => {
     localStorage.setItem("token", token);
     localStorage.setItem("name", name);
     localStorage.setItem("role", role);
+    localStorage.setItem("userId", userId);
     setIsAuthenticated(true);
   };
 

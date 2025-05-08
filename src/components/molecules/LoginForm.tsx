@@ -1,4 +1,3 @@
-// LoginForm.tsx
 "use client";
 
 import Input from "../atoms/Input";
@@ -44,10 +43,10 @@ export default function LoginForm() {
 
     try {
       const data = await loginUser(email, password);
-      const { access_token, name, role } = data;
+      const { access_token, name, role, id } = data;
 
       // Simpan login dengan hook
-      login(access_token, name, role);
+      login(access_token, name, role, id);
 
       toast.success("Login berhasil!");
 

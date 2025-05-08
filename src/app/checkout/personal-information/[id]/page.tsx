@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, useParams } from "next/navigation";
+import { useAuth } from "@/app/utils/hook/useAuth";
 import { toast } from "sonner";
 import { CheckoutTemplate } from "@/components/templates/checkout-template";
 import { TicketDetails } from "@/components/organisms/Checkout/organisms/ticket-details";
@@ -15,7 +16,7 @@ import {
   getEventDetails,
   createTransaction,
   getUserPoints,
-  getUserProfile,
+  fetchProfileInfo,
 } from "@/lib/api/axios";
 
 type AppliedVoucher = {
@@ -24,16 +25,16 @@ type AppliedVoucher = {
   discount: number;
 };
 
-export default function PersonalInfoPage({
-  params,
-}: {
-  params: { id: string };
-}) {
+export default function PersonalInfoPage() {
+  const { isAuthenticated } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const params = useParams();
+  const eventId = Array.isArray(params.id) ? params.id[0] : params.id; // Pastikan ID adalah string
+
   const quantity = Number.parseInt(searchParams.get("qty") || "1");
   const type = searchParams.get("type");
-
+  const [userId, setUserId] = useState<number | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [usePoints, setUsePoints] = useState(false);
@@ -47,7 +48,7 @@ export default function PersonalInfoPage({
   } | null>(null);
 
   const [eventData, setEventData] = useState<any>({
-    id: params.id,
+    id: eventId || "",
     title: "",
     date: "",
     location: "",
@@ -59,11 +60,11 @@ export default function PersonalInfoPage({
 
   const [userPoints, setUserPoints] = useState<number>(0);
 
-  // Sesuaikan useEffect
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const event = await getEventDetails(params.id);
+        if (!eventId) return;
+        const event = await getEventDetails(eventId);
         setEventData(event);
       } catch (error) {
         toast.error("Gagal memuat data event.");
@@ -72,13 +73,11 @@ export default function PersonalInfoPage({
 
     const fetchUserData = async () => {
       try {
-        const profile = await getUserProfile();
-        console.log("User Profile:", profile);
+        const profile = await fetchProfileInfo();
+        setUserId(profile.id);
         setName(profile.name);
         setEmail(profile.email);
         setUserPoints(profile.points);
-        console.log("Name:", name);
-        console.log("Email:", email);
       } catch (error) {
         toast.error("Gagal memuat data pengguna.");
       }
@@ -86,7 +85,7 @@ export default function PersonalInfoPage({
 
     fetchEvent();
     fetchUserData();
-  }, [params.id]);
+  }, [eventId]);
 
   const selectedTicketType = eventData.ticketTypes.find(
     (t: any) => t.id === Number(type)
@@ -112,23 +111,17 @@ export default function PersonalInfoPage({
     customVoucherDiscount;
 
   const handleContinue = async () => {
-    if (!name || !email) {
-      toast.error("Mohon lengkapi semua informasi personal");
-      return;
-    }
-
     try {
       const response = await createTransaction({
+        userId: userId as number,
         ticketTypeId: selectedTicketType?.id,
-        promotionCode: selectedVoucher || null,
-        voucherCode: appliedCustomVoucher?.code || null,
+
         usePoint: usePoints,
-        quantity,
       });
 
       toast.success("Transaksi berhasil dibuat!");
       router.push(
-        `/checkout/confirmation/${params.id}?transactionId=${response.detail.id}`
+        `/checkout/confirmation/${eventId}?transactionId=${response.detail.id}`
       );
     } catch (error: any) {
       toast.error(
@@ -136,6 +129,8 @@ export default function PersonalInfoPage({
       );
     }
   };
+  console.log("point", usePoints);
+  console.log("ticketype", selectedTicketType);
 
   const handleSelectVoucher = (code: string | null) => {
     if (!code) {
@@ -160,7 +155,6 @@ export default function PersonalInfoPage({
       eventTitle={eventData.title}
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column - Personal Information */}
         <div className="md:col-span-2">
           <TicketDetails
             eventTitle={eventData.title}
@@ -172,7 +166,6 @@ export default function PersonalInfoPage({
           <BuyerInformation name={name} email={email} />
         </div>
 
-        {/* Right Column - Payment Details */}
         <div className="md:col-span-1">
           <PaymentMethod />
 
@@ -195,24 +188,12 @@ export default function PersonalInfoPage({
             voucherDiscount={voucherDiscount}
             customVoucherDiscount={customVoucherDiscount}
             totalPrice={totalPrice}
-            previousLink={`/checkout/select-ticket/${params.id}`}
-            onContinue={handleContinue}
+            previousLink={`/checkout/select-ticket/${eventId}`}
+            onContinue={handleContinue} // Pastikan ini ada
             continueText="Bayar Sekarang"
           />
         </div>
       </div>
-
-      <VoucherModal
-        show={showVoucherModal}
-        onClose={() => setShowVoucherModal(false)}
-        availableVouchers={eventData.promotions}
-        validCustomVouchers={[]}
-        selectedVoucher={selectedVoucher?.code || ""}
-        appliedCustomVoucher={appliedCustomVoucher}
-        quantity={quantity}
-        onSelectVoucher={(code) => handleSelectVoucher(code || null)} // Gunakan null jika tidak ada
-        onApplyCustomVoucher={setAppliedCustomVoucher}
-      />
     </CheckoutTemplate>
   );
 }

@@ -95,13 +95,32 @@ export async function fetchUserInfo(userId: string) {
 // }
 
 export const createTransaction = async (data: any) => {
-  const response = await api.post("api/transactions", data);
+  const token = localStorage.getItem("token"); // atau dari context/auth hook
+  const response = await axios.post(
+    "http://localhost:3000/api/transactions",
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
   return response.data;
 };
 
 export const getUserPoints = async () => {
   const response = await api.get("api/profile");
   return response.data.detail.points;
+};
+
+export const fetchProfileInfo = async () => {
+  const token = localStorage.getItem("token"); // atau dari context/auth hook
+  const response = await axios.get("http://localhost:3000/api/profile", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data.detail;
 };
 
 export const getUserProfile = async () => {

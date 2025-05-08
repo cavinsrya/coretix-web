@@ -8,6 +8,7 @@ type EventCardProps = {
   date: string;
   venue: string;
   price: string;
+  onDelete?: () => void;
 };
 
 export default function EventCard({
@@ -16,6 +17,7 @@ export default function EventCard({
   date,
   venue,
   price,
+  onDelete,
 }: EventCardProps) {
   return (
     <div className="bg-white border rounded-md overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -39,6 +41,14 @@ export default function EventCard({
         <Text size="sm" className="font-medium mt-1">
           {price}
         </Text>
+        {onDelete && ( // Tambahkan tombol delete jika onDelete ada
+          <button
+            onClick={onDelete}
+            className="mt-2 text-red-500 text-sm hover:text-red-700"
+          >
+            Hapus Event
+          </button>
+        )}
       </div>
     </div>
   );
