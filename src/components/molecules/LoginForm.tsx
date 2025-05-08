@@ -1,3 +1,4 @@
+// LoginForm.tsx
 "use client";
 
 import Input from "../atoms/Input";
@@ -5,12 +6,12 @@ import Button from "../atoms/Button";
 import Text from "../atoms/Text";
 import { Eye, EyeOff } from "lucide-react";
 import React, { useState } from "react";
-import { loginSchema } from "@/lib/validations/auth"; // Import schema
-import { z } from "zod";
+import { loginSchema } from "@/lib/validations/auth";
 import { loginUser } from "@/lib/api/axios";
-import { useRouter } from "next/router";
 import { toast } from "sonner";
 import Logo from "../atoms/Logo";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/utils/hook/useAuth";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,8 @@ export default function LoginForm() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+  const router = useRouter();
+  const { login } = useAuth(); // Gunakan hook
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,22 +40,22 @@ export default function LoginForm() {
       return;
     }
 
-    setErrors({}); // Clear errors if validation success
+    setErrors({});
 
-    // BackEnd Simulation here
     try {
       const data = await loginUser(email, password);
       const { access_token, name, role } = data;
 
-      localStorage.setItem("token", access_token);
-      localStorage.setItem("role", role);
-      localStorage.setItem("name", name);
+      // Simpan login dengan hook
+      login(access_token, name, role);
 
       toast.success("Login berhasil!");
+
+      // Redirect menggunakan router
       if (role === "ORGANIZER") {
-        window.location.href = "/promotor/dashboard";
+        router.push("/promotor/dashboard");
       } else {
-        window.location.href = "/";
+        router.push("/");
       }
     } catch (error: any) {
       console.error(error);
@@ -81,107 +84,32 @@ export default function LoginForm() {
           >
             Masuk ke akun kamu
           </Text>
-          <Text
-            size="sm"
-            color="muted"
-            fontFamily="sans"
-            weight="normal"
-            className="mb-6 text-center"
-          >
-            The faster you will up, the faster you get a ticket"
-          </Text>
 
           <div className="space-y-4">
-            {/* Email Field */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-sans font-semibold text-gray-700 mb-1"
-              >
-                Email
-              </label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Masukkan Email Anda"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <div className="relative">
               <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="Masukkan Email Anda"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent bg-white bg-opacity-90 font-sans font-light"
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Masukkan Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
+              <span onClick={() => setShowPassword(!showPassword)}>
+                {showPassword ? <EyeOff /> : <Eye />}
+              </span>
             </div>
-
-            {/* Password Field */}
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-sans font-semibold text-gray-700 mb-1"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Masukkan Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent bg-white bg-opacity-90 font-sans font-light"
-                />
-                <span
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
-                </span>
-              </div>
-              {errors.password && (
-                <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-              )}
-            </div>
-
-            {/* Forgot Password */}
-            <div className="flex justify-end">
-              <a
-                href="/forgot-password"
-                className="text-sm font-sans text-[#050557] font-normal hover:underline"
-              >
-                Lupa Password?
-              </a>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              variant="accent"
-              className="w-full py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors justify-center"
-              onClick={undefined}
-              disabled={loading}
-            >
-              {" "}
-              <Text weight="bold" size="lg" color="white">
-                {" "}
-                {loading ? "Memproses..." : "Masuk"}
-              </Text>
+            <Button type="submit" variant="accent" disabled={loading}>
+              {loading ? "Memproses..." : "Masuk"}
             </Button>
-          </div>
-
-          {/* Register */}
-          <div className="mt-6 text-center">
-            <Text size="sm" fontFamily="sans" weight="normal">
-              Kamu belum punya akun?{" "}
-              <a href="/register" className="text-[#050557] hover:underline">
-                Daftar
-              </a>
-            </Text>
           </div>
         </div>
       </form>

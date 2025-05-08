@@ -1,4 +1,6 @@
 import axios from "axios";
+import { profile } from "console";
+import { useAuth } from "@/app/utils/hook/useAuth";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -77,20 +79,51 @@ export async function fetchUserInfo(userId: string) {
 }
 
 // Fungsi untuk Create Transaction (Checkout)
-export async function createTransaction(data: {
-  ticketTypeId: number;
-  promotionCode?: string;
-  voucherCode?: string;
-  usePoint?: boolean;
-}) {
-  try {
-    const response = await api.post("/api/transactions", data);
-    return response.data.detail;
-  } catch (error) {
-    console.error("Failed to create transaction:", error);
-    throw error;
+// export async function createTransaction(data: {
+//   ticketTypeId: number;
+//   promotionCode?: string;
+//   voucherCode?: string;
+//   usePoint?: boolean;
+// }) {
+//   try {
+//     const response = await api.post("/api/transactions", data);
+//     return response.data.detail;
+//   } catch (error) {
+//     console.error("Failed to create transaction:", error);
+//     throw error;
+//   }
+// }
+
+export const createTransaction = async (data: any) => {
+  const response = await api.post("api/transactions", data);
+  return response.data;
+};
+
+export const getUserPoints = async () => {
+  const response = await api.get("api/profile");
+  return response.data.detail.points;
+};
+
+export const getUserProfile = async () => {
+  const { isAuthenticated } = useAuth();
+  const token = localStorage.getItem("token"); // Ambil token dari localStorage
+
+  if (!isAuthenticated || !token) {
+    throw new Error("User is not authenticated.");
   }
-}
+
+  try {
+    const response = await axios.get("api/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`, // Sertakan token di header
+      },
+    });
+    return response.data.detail; // Mengembalikan data profil lengkap
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    throw error; // Agar error dapat ditangani lebih lanjut
+  }
+};
 
 // 🔹 Fungsi Get User
 // export async function getProfile() {

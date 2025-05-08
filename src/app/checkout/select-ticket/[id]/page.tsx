@@ -1,3 +1,4 @@
+// pages/checkout/select-ticket/[id]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,7 +15,6 @@ export default function SelectTicketPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(2);
   const [eventData, setEventData] = useState<any>({
     id: params.id,
     title: "",
@@ -22,7 +22,13 @@ export default function SelectTicketPage({
     location: "",
     price: 0,
     image: "",
+    ticketTypes: [],
   });
+
+  const [selectedTicketType, setSelectedTicketType] = useState<number | null>(
+    null
+  );
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -35,8 +41,8 @@ export default function SelectTicketPage({
             event.endDate
           ).toLocaleDateString()}`,
           location: event.location,
-          price: event.price,
           image: event.imageUrl,
+          ticketTypes: event.ticketTypes || [],
         });
       } catch (error) {
         alert("Gagal mengambil data event.");
@@ -48,20 +54,31 @@ export default function SelectTicketPage({
     fetchEvent();
   }, [params.id]);
 
-  const decreaseQuantity = () => {
-    if (quantity > 1) {
-      setQuantity(quantity - 1);
+  const handleSelectTicketType = (ticketId: number) => {
+    setSelectedTicketType(ticketId);
+    setQuantity(1); // Reset quantity saat ticket type berubah
+  };
+
+  const handleQuantityChange = (amount: number) => {
+    if (selectedTicketType) {
+      setQuantity((prev) => Math.max(1, prev + amount));
     }
   };
 
-  const increaseQuantity = () => {
-    setQuantity(quantity + 1);
-  };
-
-  const totalPrice = eventData.price * quantity;
+  const totalPrice = selectedTicketType
+    ? eventData.ticketTypes.find((t: any) => t.id === selectedTicketType)
+        ?.price * quantity || 0
+    : 0;
 
   const handleContinue = () => {
-    router.push(`/checkout/personal-info/${params.id}?qty=${quantity}`);
+    if (!selectedTicketType) {
+      alert("Pilih tipe ticket terlebih dahulu.");
+      return;
+    }
+
+    router.push(
+      `/checkout/personal-information/${params.id}?type=${selectedTicketType}&qty=${quantity}`
+    );
   };
 
   if (loading) return <p>Loading...</p>;
@@ -81,10 +98,11 @@ export default function SelectTicketPage({
             eventTitle={eventData.title}
             eventDate={eventData.date}
             eventLocation={eventData.location}
-            ticketPrice={eventData.price}
+            ticketTypes={eventData.ticketTypes}
+            selectedTicketType={selectedTicketType}
+            onSelectTicketType={handleSelectTicketType}
             quantity={quantity}
-            onDecreaseQuantity={decreaseQuantity}
-            onIncreaseQuantity={increaseQuantity}
+            onQuantityChange={handleQuantityChange}
           />
         </div>
 
@@ -93,7 +111,7 @@ export default function SelectTicketPage({
           <OrderSummary
             eventTitle={eventData.title}
             quantity={quantity}
-            ticketPrice={eventData.price}
+            ticketPrice={totalPrice}
             totalPrice={totalPrice}
             previousLink={`/event/${params.id}`}
             onContinue={handleContinue}
@@ -104,68 +122,3 @@ export default function SelectTicketPage({
     </CheckoutTemplate>
   );
 }
-
-// // checkout/select-ticket/[id]/page.tsx
-// "use client";
-// import React, { useState, useEffect } from "react";
-// import { useRouter, useParams } from "next/navigation";
-// import SelectTicketTemplate from "@/components/templates/SelectTicketTemplate";
-// import { fetchEventById } from "@/lib/api/axios";
-
-// export default function page() {
-//   const router = useRouter();
-//   const params = useParams();
-//   const [quantity, setQuantity] = useState(1);
-//   const [selectedTicket, setSelectedTicket] = useState<number>(0);
-//   const [eventData, setEventData] = useState<any>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const loadEvent = async () => {
-//       try {
-//         const eventId = Array.isArray(params?.id) ? params.id[0] : params.id;
-//         if (eventId) {
-//           const event = await fetchEventById(eventId);
-//           setEventData(event);
-//           setSelectedTicket(event.ticketTypes[0]?.id); // Pilih tiket pertama secara default
-//           setLoading(false);
-//         }
-//       } catch (error) {
-//         console.error("Failed to fetch event data:", error);
-//         setLoading(false);
-//       }
-//     };
-//     loadEvent();
-//   }, [params]);
-
-//   const decreaseQuantity = () => quantity > 1 && setQuantity(quantity - 1);
-//   const increaseQuantity = () => setQuantity(quantity + 1);
-
-//   const handleContinue = () => {
-//     if (eventData) {
-//       router.push(
-//         `/checkout/personal-info/${eventData.id}?qty=${quantity}&ticketType=${selectedTicket}`
-//       );
-//     }
-//   };
-
-//   if (loading) {
-//     return <div>Loading...</div>;
-//   }
-
-//   if (!eventData) {
-//     return <div>Error loading event data.</div>;
-//   }
-
-//   return (
-//     <SelectTicketTemplate
-//       eventData={eventData}
-//       quantity={quantity}
-//       decreaseQuantity={decreaseQuantity}
-//       increaseQuantity={increaseQuantity}
-//       selectedTicket={selectedTicket}
-//       setSelectedTicket={setSelectedTicket}
-//       handleContinue={handleContinue}
-//     />
-//   );
-// }

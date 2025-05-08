@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { CheckoutTemplate } from "@/components/templates/checkout-template";
@@ -11,6 +11,18 @@ import { VoucherSection } from "@/components/organisms/Checkout/organisms/vouche
 import { PointsSection } from "@/components/organisms/Checkout/organisms/points-section";
 import { PaymentDetails } from "@/components/organisms/Checkout/organisms/payment-details";
 import { VoucherModal } from "@/components/organisms/Checkout/organisms/voucher-modal";
+import {
+  getEventDetails,
+  createTransaction,
+  getUserPoints,
+  getUserProfile,
+} from "@/lib/api/axios";
+
+type AppliedVoucher = {
+  id: string;
+  code: string;
+  discount: number;
+};
 
 export default function PersonalInfoPage({
   params,
@@ -20,83 +32,78 @@ export default function PersonalInfoPage({
   const router = useRouter();
   const searchParams = useSearchParams();
   const quantity = Number.parseInt(searchParams.get("qty") || "1");
+  const type = searchParams.get("type");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [usePoints, setUsePoints] = useState(false);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
-  const [selectedVoucher, setSelectedVoucher] = useState<string | null>(null);
+  const [selectedVoucher, setSelectedVoucher] = useState<AppliedVoucher | null>(
+    null
+  );
   const [appliedCustomVoucher, setAppliedCustomVoucher] = useState<{
     code: string;
     discount: number;
   } | null>(null);
 
-  const [eventData, setEventData] = useState({
+  const [eventData, setEventData] = useState<any>({
     id: params.id,
-    title: "Hearts2Hearts The Chase",
-    date: "25 Apr - 25 Apr 2025",
-    location: "Gelora Bung Karno",
-    price: 210000,
-    image: "/placeholder.svg?height=300&width=800",
+    title: "",
+    date: "",
+    location: "",
+    price: 0,
+    image: "",
+    ticketTypes: [],
+    promotions: [],
   });
 
-  // Dummy vouchers with additional requirements
-  const availableVouchers = [
-    {
-      id: "v1",
-      code: "NEWUSER",
-      discount: 20000,
-      description: "Diskon Rp 20.000 untuk pengguna baru",
-      minTickets: 1,
-      expiryDate: "30 Apr 2025",
-      remainingUses: 500,
-    },
-    {
-      id: "v2",
-      code: "WEEKEND",
-      discount: 15000,
-      description: "Diskon Rp 15.000 untuk pembelian di akhir pekan",
-      minTickets: 2,
-      expiryDate: "15 May 2025",
-      remainingUses: 200,
-    },
-    {
-      id: "v3",
-      code: "GROUPBUY",
-      discount: 50000,
-      description: "Diskon Rp 50.000 untuk pembelian grup",
-      minTickets: 4,
-      expiryDate: "10 May 2025",
-      remainingUses: 100,
-    },
-  ];
+  const [userPoints, setUserPoints] = useState<number>(0);
 
-  // Custom voucher codes for demo
-  const validCustomVouchers = [
-    {
-      code: "SPECIAL25",
-      discount: 25000,
-    },
-    {
-      code: "PROMO40",
-      discount: 40000,
-    },
-  ];
+  // Sesuaikan useEffect
+  useEffect(() => {
+    const fetchEvent = async () => {
+      try {
+        const event = await getEventDetails(params.id);
+        setEventData(event);
+      } catch (error) {
+        toast.error("Gagal memuat data event.");
+      }
+    };
 
-  // Dummy points
-  const userPoints = 10000;
+    const fetchUserData = async () => {
+      try {
+        const profile = await getUserProfile();
+        console.log("User Profile:", profile);
+        setName(profile.name);
+        setEmail(profile.email);
+        setUserPoints(profile.points);
+        console.log("Name:", name);
+        console.log("Email:", email);
+      } catch (error) {
+        toast.error("Gagal memuat data pengguna.");
+      }
+    };
 
-  const ticketPrice = eventData.price * quantity;
+    fetchEvent();
+    fetchUserData();
+  }, [params.id]);
+
+  const selectedTicketType = eventData.ticketTypes.find(
+    (t: any) => t.id === Number(type)
+  );
+
+  const ticketPrice = selectedTicketType
+    ? selectedTicketType.price * quantity
+    : 0;
   const adminFee = 2000;
   const pointsDiscount = usePoints ? userPoints : 0;
   const voucherDiscount = selectedVoucher
-    ? availableVouchers.find((v) => v.id === selectedVoucher)?.discount || 0
+    ? eventData.promotions.find((v: any) => v.code === selectedVoucher)
+        ?.amount || 0
     : 0;
   const customVoucherDiscount = appliedCustomVoucher
     ? appliedCustomVoucher.discount
     : 0;
-
   const totalPrice =
     ticketPrice +
     adminFee -
@@ -104,41 +111,52 @@ export default function PersonalInfoPage({
     voucherDiscount -
     customVoucherDiscount;
 
-  const handleContinue = () => {
-    if (!name || !email || !phone) {
+  const handleContinue = async () => {
+    if (!name || !email) {
       toast.error("Mohon lengkapi semua informasi personal");
       return;
     }
 
-    // Generate invoice code once
-    const invoiceCode = "CRTX" + Math.floor(10000 + Math.random() * 90000);
+    try {
+      const response = await createTransaction({
+        ticketTypeId: selectedTicketType?.id,
+        promotionCode: selectedVoucher || null,
+        voucherCode: appliedCustomVoucher?.code || null,
+        usePoint: usePoints,
+        quantity,
+      });
 
-    // Normally we would save this data to a state management solution or API
-    // For this demo, we'll just pass it via URL params
-    router.push(
-      `/checkout/confirmation/${params.id}?qty=${quantity}&points=${
-        usePoints ? userPoints : 0
-      }&invoice=${invoiceCode}&voucher=${
-        selectedVoucher || ""
-      }&voucherDiscount=${voucherDiscount + customVoucherDiscount}`
-    );
+      toast.success("Transaksi berhasil dibuat!");
+      router.push(
+        `/checkout/confirmation/${params.id}?transactionId=${response.detail.id}`
+      );
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message || "Gagal membuat transaksi. Coba lagi."
+      );
+    }
   };
 
-  const selectedVoucherObject = selectedVoucher
-    ? {
-        id: selectedVoucher,
-        code:
-          availableVouchers.find((v) => v.id === selectedVoucher)?.code || "",
-        discount:
-          availableVouchers.find((v) => v.id === selectedVoucher)?.discount ||
-          0,
-      }
-    : null;
+  const handleSelectVoucher = (code: string | null) => {
+    if (!code) {
+      setSelectedVoucher(null);
+      return;
+    }
+
+    const selected = eventData.promotions.find((v: any) => v.code === code);
+    if (selected) {
+      setSelectedVoucher({
+        id: selected.id.toString(),
+        code: selected.code,
+        discount: selected.amount,
+      });
+    }
+  };
 
   return (
     <CheckoutTemplate
       currentStep={2}
-      eventImageUrl={eventData.image}
+      eventImageUrl={eventData.imageUrl}
       eventTitle={eventData.title}
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -147,18 +165,11 @@ export default function PersonalInfoPage({
           <TicketDetails
             eventTitle={eventData.title}
             eventDate={eventData.date}
-            ticketPrice={eventData.price}
+            ticketPrice={ticketPrice / quantity}
             quantity={quantity}
           />
 
-          <BuyerInformation
-            name={name}
-            email={email}
-            phone={phone}
-            onNameChange={(e) => setName(e.target.value)}
-            onEmailChange={(e) => setEmail(e.target.value)}
-            onPhoneChange={(e) => setPhone(e.target.value)}
-          />
+          <BuyerInformation name={name} email={email} />
         </div>
 
         {/* Right Column - Payment Details */}
@@ -166,7 +177,7 @@ export default function PersonalInfoPage({
           <PaymentMethod />
 
           <VoucherSection
-            selectedVoucher={selectedVoucherObject}
+            selectedVoucher={selectedVoucher}
             appliedCustomVoucher={appliedCustomVoucher}
             onVoucherClick={() => setShowVoucherModal(true)}
           />
@@ -194,12 +205,12 @@ export default function PersonalInfoPage({
       <VoucherModal
         show={showVoucherModal}
         onClose={() => setShowVoucherModal(false)}
-        availableVouchers={availableVouchers}
-        validCustomVouchers={validCustomVouchers}
-        selectedVoucher={selectedVoucher}
+        availableVouchers={eventData.promotions}
+        validCustomVouchers={[]}
+        selectedVoucher={selectedVoucher?.code || ""}
         appliedCustomVoucher={appliedCustomVoucher}
         quantity={quantity}
-        onSelectVoucher={setSelectedVoucher}
+        onSelectVoucher={(code) => handleSelectVoucher(code || null)} // Gunakan null jika tidak ada
         onApplyCustomVoucher={setAppliedCustomVoucher}
       />
     </CheckoutTemplate>

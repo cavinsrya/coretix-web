@@ -7,20 +7,9 @@ import { InputField } from "@/components/molecules/Checkout/molecules/input-fiel
 interface BuyerInformationProps {
   name: string;
   email: string;
-  phone: string;
-  onNameChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onEmailChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPhoneChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-export function BuyerInformation({
-  name,
-  email,
-  phone,
-  onNameChange,
-  onEmailChange,
-  onPhoneChange,
-}: BuyerInformationProps) {
+export function BuyerInformation({ name, email }: BuyerInformationProps) {
   return (
     <div className="border rounded-lg p-6">
       <h3 className="text-lg font-bold mb-2">Buyer Information</h3>
@@ -34,8 +23,7 @@ export function BuyerInformation({
           label="Nama Lengkap"
           type="text"
           value={name}
-          onChange={onNameChange}
-          required
+          readOnly // Input ini tidak bisa diubah
         />
 
         <InputField
@@ -43,18 +31,8 @@ export function BuyerInformation({
           label="Email"
           type="email"
           value={email}
-          onChange={onEmailChange}
-          required
+          readOnly // Input ini tidak bisa diubah
           helperText="*E-tiket akan dikirim melalui email ini."
-        />
-
-        <InputField
-          id="phone"
-          label="No Handphone"
-          type="tel"
-          value={phone}
-          onChange={onPhoneChange}
-          required
         />
       </div>
     </div>

@@ -8,15 +8,15 @@ interface AppliedVoucher {
   discount: number;
 }
 
-interface AppliedCustomVoucher {
-  code: string;
-  discount: number;
-}
-
 interface VoucherSectionProps {
   selectedVoucher: AppliedVoucher | null;
   appliedCustomVoucher: AppliedCustomVoucher | null;
   onVoucherClick: () => void;
+}
+
+interface AppliedCustomVoucher {
+  code: string;
+  discount: number;
 }
 
 export function VoucherSection({

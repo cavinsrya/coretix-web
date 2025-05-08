@@ -1,4 +1,6 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import { useRouter } from "next/navigation";
 import dayjs from "dayjs";
@@ -9,7 +11,13 @@ type Props = {
 
 export default function CardEventDetail({ event }: Props) {
   const router = useRouter();
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Periksa status login di client-side
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token); // true jika token ada
+  }, []);
 
   // Format tanggal dan waktu
   const formattedDate = `${dayjs(event.startDate).format(
@@ -18,6 +26,15 @@ export default function CardEventDetail({ event }: Props) {
   const formattedTime = `${dayjs(event.startDate).format("HH:mm")} - ${dayjs(
     event.endDate
   ).format("HH:mm")} (WIB)`;
+
+  const handleBuyTicket = () => {
+    if (isLoggedIn) {
+      router.push(`/checkout/select-ticket/${event.id}`);
+    } else {
+      alert("Anda perlu login terlebih dahulu.");
+      router.push("/login");
+    }
+  };
 
   return (
     <div className="md:col-span-1">
@@ -43,13 +60,7 @@ export default function CardEventDetail({ event }: Props) {
         </div>
 
         <button
-          onClick={() => {
-            if (isLoggedIn) {
-              router.push(`/checkout/select-ticket/${event.id}`);
-            } else {
-              alert("You need to login first.");
-            }
-          }}
+          onClick={handleBuyTicket}
           className="block w-full bg-[#86e64c] text-center font-medium py-3 px-4 rounded-md"
         >
           Beli Tiket
