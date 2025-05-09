@@ -11,7 +11,7 @@ interface ApprovalCardProps {
     purchaseDate: string;
     quantity: number;
     ticketType: string;
-    totalAmount: number;
+    totalPrice: number;
     paymentMethod: string;
     paymentProof: string;
     status: string;
@@ -77,7 +77,7 @@ export function ApprovalCard({
             <div className="flex items-center gap-2">
               <Banknote className="h-4 w-4 text-[#050557]" />
               <span className="text-sm">
-                Rp {order.totalAmount.toLocaleString()}
+                Rp {order.totalPrice?.toLocaleString()}
               </span>
             </div>
           </div>

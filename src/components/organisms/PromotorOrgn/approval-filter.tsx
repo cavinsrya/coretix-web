@@ -8,7 +8,9 @@ interface ApprovalFilterProps {
 }
 
 export function ApprovalFilter({ onFilterChange }: ApprovalFilterProps) {
-  const [filterStatus, setFilterStatus] = useState<string>("pending");
+  const [filterStatus, setFilterStatus] = useState<string>(
+    "WAITING_CONFIRMATION"
+  );
 
   const handleFilterChange = (status: string) => {
     setFilterStatus(status);
@@ -25,18 +27,18 @@ export function ApprovalFilter({ onFilterChange }: ApprovalFilterProps) {
         />
         <FilterButton
           label="Menunggu Approval"
-          isActive={filterStatus === "pending"}
-          onClick={() => handleFilterChange("pending")}
+          isActive={filterStatus === "WAITING_CONFIRMATION"}
+          onClick={() => handleFilterChange("WAITING_CONFIRMATION")}
         />
         <FilterButton
           label="Approved"
-          isActive={filterStatus === "approved"}
-          onClick={() => handleFilterChange("approved")}
+          isActive={filterStatus === "DONE"}
+          onClick={() => handleFilterChange("DONE")}
         />
         <FilterButton
           label="Rejected"
-          isActive={filterStatus === "rejected"}
-          onClick={() => handleFilterChange("rejected")}
+          isActive={filterStatus === "REJECTED"}
+          onClick={() => handleFilterChange("REJECTED")}
         />
       </div>
     </div>

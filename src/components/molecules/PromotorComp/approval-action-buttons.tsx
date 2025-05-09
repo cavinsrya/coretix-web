@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { CheckCircle, Eye, XCircle } from "lucide-react"
+import { CheckCircle, Eye, XCircle } from "lucide-react";
 
 interface ApprovalActionButtonsProps {
-  orderId: string
-  status: string
-  onViewProof: () => void
-  onApprove: () => void
-  onReject: () => void
+  orderId: string;
+  status: string;
+  onViewProof: () => void;
+  onApprove: () => void;
+  onReject: () => void;
 }
 
 export function ApprovalActionButtons({
@@ -27,7 +27,7 @@ export function ApprovalActionButtons({
         Lihat Bukti
       </button>
 
-      {status === "pending" && (
+      {status === "WAITING_CONFIRMATION" && (
         <>
           <button
             onClick={onReject}
@@ -46,5 +46,5 @@ export function ApprovalActionButtons({
         </>
       )}
     </div>
-  )
+  );
 }

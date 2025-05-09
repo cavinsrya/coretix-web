@@ -1,61 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle, X } from "lucide-react";
 import Image from "next/image";
 import { ApprovalCard } from "./approval-card";
 import { ApprovalFilter } from "./approval-filter";
+import { getAllTransactions } from "@/lib/api/axios";
 
 // Sample ticket order data
-const dummyOrders = [
-  {
-    id: "1",
-    eventId: "1",
-    eventName: "Jakarta Music Festival 2025",
-    customerName: "Budi Santoso",
-    customerEmail: "budi@example.com",
-    purchaseDate: "15 May 2025 10:30",
-    quantity: 2,
-    ticketType: "VIP",
-    totalAmount: 500000,
-    paymentMethod: "Bank Transfer",
-    paymentProof: "/placeholder.svg?height=600&width=400",
-    status: "pending",
-  },
-  {
-    id: "2",
-    eventId: "1",
-    eventName: "Jakarta Music Festival 2025",
-    customerName: "Siti Nuraini",
-    customerEmail: "siti@example.com",
-    purchaseDate: "15 May 2025 11:45",
-    quantity: 1,
-    ticketType: "Regular",
-    totalAmount: 150000,
-    paymentMethod: "Bank Transfer",
-    paymentProof: "/placeholder.svg?height=600&width=400",
-    status: "pending",
-  },
-  {
-    id: "3",
-    eventId: "2",
-    eventName: "Business Summit 2025",
-    customerName: "Agus Purnomo",
-    customerEmail: "agus@example.com",
-    purchaseDate: "14 May 2025 09:15",
-    quantity: 3,
-    ticketType: "Early Bird",
-    totalAmount: 750000,
-    paymentMethod: "Bank Transfer",
-    paymentProof: "/placeholder.svg?height=600&width=400",
-    status: "pending",
-  },
-];
 
 export function ApprovalList() {
-  const [orders, setOrders] = useState(dummyOrders);
+  const [orders, setOrders] = useState<any[]>([]);
   const [viewProof, setViewProof] = useState<string | null>(null);
-  const [filterStatus, setFilterStatus] = useState<string>("pending");
+  const [filterStatus, setFilterStatus] = useState<string>(
+    "WAITING_CONFIRMATION"
+  );
+
+  // Fetch dari API
+  useEffect(() => {
+    const fetchOrders = async (status: string) => {
+      try {
+        const data = await getAllTransactions({ status });
+        // Transform data supaya match dengan ApprovalCard
+        const mapped = data.detail?.transactions.map((tx: any) => ({
+          id: String(tx.id),
+          eventId: String(tx.event?.id),
+          eventName: tx.ticketType?.event?.title || "Unknown Event",
+          customerName: tx.user?.name || "Unknown",
+          customerEmail: tx.user?.email || "-",
+          purchaseDate: new Date(tx.createdAt).toLocaleDateString("id-ID"),
+          quantity: tx.quantity,
+          ticketType: tx.ticketType?.name || "-",
+          totalPrice: tx.totalPrice,
+          paymentMethod: "-", // kamu bisa isi sesuai data kalau ada
+          paymentProof: tx.paymentProof,
+          status: tx.status, // disesuaikan dengan kondisi if
+        }));
+
+        setOrders(mapped);
+      } catch (err) {
+        console.error("Failed to fetch transactions", err);
+      }
+    };
+
+    fetchOrders(filterStatus);
+  }, [filterStatus]);
 
   // Handle approve order
   const handleApprove = (orderId: string) => {
@@ -82,10 +71,12 @@ export function ApprovalList() {
   };
 
   // Filter orders based on status
-  const filteredOrders = orders.filter((order) => {
-    if (filterStatus === "all") return true;
-    return order.status === filterStatus;
-  });
+  const filteredOrders = Array.isArray(orders)
+    ? orders.filter((order) => {
+        if (filterStatus === "all") return true;
+        return order.status === filterStatus;
+      })
+    : [];
 
   return (
     <>
@@ -110,17 +101,16 @@ export function ApprovalList() {
           </div>
           <h3 className="text-lg font-medium mb-2">Tidak ada transaksi</h3>
           <p className="text-gray-500">
-            {filterStatus === "pending" &&
+            {filterStatus === "WAITING_CONFIRMATION" &&
               "Tidak ada transaksi yang menunggu approval"}
-            {filterStatus === "approved" &&
+            {filterStatus === "DONE" &&
               "Tidak ada transaksi yang sudah diapprove"}
-            {filterStatus === "rejected" && "Tidak ada transaksi yang ditolak"}
+            {filterStatus === "REJECTED" && "Tidak ada transaksi yang ditolak"}
             {filterStatus === "all" && "Belum ada transaksi"}
           </p>
         </div>
       )}
 
-      {/* Payment Proof Modal */}
       {viewProof && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"

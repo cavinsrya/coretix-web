@@ -125,8 +125,8 @@ export const fetchProfileInfo = async () => {
 
 export const getTransactionById = async (transactionId: number) => {
   const token = localStorage.getItem("token"); // atau dari auth context/hook
-  console.log("GET transactionId:", transactionId);
-  console.log("Authorization token:", token);
+  //console.log("GET transactionId:", transactionId);
+  //console.log("Authorization token:", token);
   const response = await axios.get(
     `http://localhost:3000/api/transactions/${transactionId}`,
     {
@@ -136,6 +136,29 @@ export const getTransactionById = async (transactionId: number) => {
     }
   );
   return response.data.data;
+};
+
+export interface GetAllTransactionParams {
+  page?: number;
+  limit?: number;
+  status?: string;
+  eventId?: number;
+}
+
+export const getAllTransactions = async (params?: GetAllTransactionParams) => {
+  const token = localStorage.getItem("token");
+
+  const response = await axios.get(
+    "http://localhost:3000/api/dashboard/transactions-list",
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params,
+    }
+  );
+
+  return response.data; // { transactions, total }
 };
 
 export const getUserProfile = async () => {
