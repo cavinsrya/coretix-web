@@ -5,7 +5,11 @@ import { CheckCircle, X } from "lucide-react";
 import Image from "next/image";
 import { ApprovalCard } from "./approval-card";
 import { ApprovalFilter } from "./approval-filter";
-import { getAllTransactions } from "@/lib/api/axios";
+import {
+  getAllTransactions,
+  acceptTransaction,
+  rejectTransaction,
+} from "@/lib/api/axios";
 
 // Sample ticket order data
 
@@ -47,27 +51,43 @@ export function ApprovalList() {
   }, [filterStatus]);
 
   // Handle approve order
-  const handleApprove = (orderId: string) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: "approved" } : order
-      )
-    );
+  const handleApprove = async (orderId: string) => {
+    try {
+      await acceptTransaction(Number(orderId));
 
-    // In a real app, you would send approval email here
-    alert(`Approval email will be sent to customer for order #${orderId}`);
+      setOrders(
+        orders.map((order) =>
+          order.id === orderId ? { ...order, status: "DONE" } : order
+        )
+      );
+
+      alert(
+        `Transaction approved, email will be sent to customer for order #${orderId}`
+      );
+    } catch (error) {
+      console.error("Gagal meng-approve transaksi:", error);
+      alert(`Gagal approve transaksi #${orderId}.`);
+    }
   };
 
   // Handle reject order
-  const handleReject = (orderId: string) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: "rejected" } : order
-      )
-    );
+  const handleReject = async (orderId: string) => {
+    try {
+      await rejectTransaction(Number(orderId));
 
-    // In a real app, you would send rejection email here
-    alert(`Rejection email will be sent to customer for order #${orderId}`);
+      setOrders(
+        orders.map((order) =>
+          order.id === orderId ? { ...order, status: "REJECTED" } : order
+        )
+      );
+
+      alert(
+        `Transaction rejected, email will be sent to customer for order #${orderId}`
+      );
+    } catch (error) {
+      console.error("Gagal mereject transaksi:", error);
+      alert(`Gagal Reject transaksi #${orderId}.`);
+    }
   };
 
   // Filter orders based on status

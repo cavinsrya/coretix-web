@@ -161,6 +161,50 @@ export const getAllTransactions = async (params?: GetAllTransactionParams) => {
   return response.data; // { transactions, total }
 };
 
+export async function acceptTransaction(transactionId: number) {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.patch(
+      `http://localhost:3000/api/dashboard/transactions/${transactionId}/accept`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to accept transaction"
+    );
+  }
+}
+
+export async function rejectTransaction(transactionId: number) {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await axios.patch(
+      `http://localhost:3000/api/dashboard/transactions/${transactionId}/reject`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
+    throw new Error(
+      error.response?.data?.message || "Failed to reject transaction"
+    );
+  }
+}
+
 export const getUserProfile = async () => {
   const { isAuthenticated } = useAuth();
   const token = localStorage.getItem("token"); // Ambil token dari localStorage
