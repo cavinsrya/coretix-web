@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 type Props = {
   event: any;
@@ -53,7 +54,13 @@ export function EventDetails({ event }: Props) {
             <div>
               {/* Organizer */}
               <div className="flex items-center gap-3 mb-6">
-                <div className="bg-gray-200 h-10 w-10 rounded-full overflow-hidden"></div>
+                <Image
+                  className="w-10 rounded-full overflow-hidden"
+                  src={event.organizer?.profileImage}
+                  alt="profile promotor"
+                  width={10}
+                  height={10}
+                />
                 <div>
                   <p className="text-xs text-gray-500">Diselenggarakan Oleh</p>
                   <Link href={`/`} className="font-medium hover:underline">

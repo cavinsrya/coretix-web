@@ -56,7 +56,9 @@ export default function CardEventDetail({ event }: Props) {
         </div>
         <div className="border-t pt-4 mb-4">
           <p className="text-sm text-gray-500">Mulai Dari</p>
-          <p className="font-bold text-lg">{event.price}</p>
+          <p className="font-bold text-lg">
+            Rp {event.price?.toLocaleString?.() || "-"}
+          </p>
         </div>
 
         <button
