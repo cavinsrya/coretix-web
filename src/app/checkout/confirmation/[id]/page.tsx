@@ -113,7 +113,9 @@ export default function ConfirmationPage({
         file: selectedFile,
       });
 
-      alert("Pembayaran berhasil! Tiket akan dikirim ke email Anda.");
+      alert(
+        "Pembayaran berhasil! Notifikasi akan dikirim ke email Anda jika pembayaran sudah dikonfirmasi."
+      );
       router.push("/");
     } catch (error: any) {
       console.error("Upload gagal:", error);
