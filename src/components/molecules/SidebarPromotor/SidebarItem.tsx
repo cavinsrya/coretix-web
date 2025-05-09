@@ -14,13 +14,18 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { fetchProfileInfo } from "@/lib/api/axios";
 import Link from "next/link";
 // import Button from "../atoms/Button";
 import Logo from "../../atoms/Logo";
+import { log, profile } from "console";
 
 export default function SidebarItem() {
   const [collapsed, setCollapsed] = useState(false);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [name, setName] = useState("");
+  const [profileImg, setProfileImg] = useState("");
   const pathname = usePathname();
   const menuItems = [
     {
@@ -44,6 +49,22 @@ export default function SidebarItem() {
       icon: <User className="w-5 h-5" />,
     },
   ];
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const profile = await fetchProfileInfo();
+
+        setUserId(profile.id);
+        setName(profile.name);
+        setProfileImg(profile.profileImage);
+      } catch (error) {
+        toast.error("Gagal memuat data pengguna.");
+      }
+    };
+    fetchUserData();
+  }, []);
+
   return (
     <>
       <div
@@ -86,17 +107,17 @@ export default function SidebarItem() {
           {collapsed ? (
             <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden relative">
               <Image
-                src="/placeholder.svg"
+                src={profileImg}
                 alt="Profile"
                 fill
-                className="object-cover"
+                className="w-10 rounded-full overflow-hidden"
               />
             </div>
           ) : (
             <>
               <div className="w-10 h-10 bg-gray-200 rounded-full overflow-hidden relative">
                 <Image
-                  src="/placeholder.svg"
+                  src={profileImg}
                   alt="Profile"
                   fill
                   className="object-cover"
@@ -104,7 +125,7 @@ export default function SidebarItem() {
               </div>
               <div>
                 <p className="text-white font-medium text-sm line-clamp-1">
-                  Ismaya Group
+                  {name}
                 </p>
                 <p className="text-[#86e64c] text-xs">Promoter</p>
               </div>
