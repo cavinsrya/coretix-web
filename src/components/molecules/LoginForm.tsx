@@ -52,7 +52,7 @@ export default function LoginForm() {
 
       // Redirect menggunakan router
       if (role === "ORGANIZER") {
-        router.push("/promotor/dashboard");
+        router.push("/promoter/dashboard");
       } else {
         router.push("/");
       }
@@ -71,6 +71,99 @@ export default function LoginForm() {
         className="bg-white/70 backdrop-blur-md w-full max-w-md rounded-t-lg md:rounded-lg md:shadow-lg md:my-10 sm:mt-[40vh]"
       >
         <div className="p-6 md:p-8">
+          <Text
+            size="xxl"
+            weight="black"
+            fontFamily="sans"
+            className="text-center"
+          >
+            Masuk ke akun kamu
+          </Text>
+          <Text
+            size="sm"
+            color="muted"
+            fontFamily="sans"
+            weight="normal"
+            className="mb-6 text-center"
+          >
+            The faster you fill up, the faster you get a ticket
+          </Text>
+
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-sans font-semibold text-gray-700 mb-1"
+              >
+                Email
+              </label>
+              <Input
+                id="email"
+                name="email"
+                type="text"
+                placeholder="Masukkan Email Anda"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent bg-white bg-opacity-90 font-sans font-light"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Password
+              </label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent bg-white bg-opacity-90 font-sans font-light"
+                  placeholder="Masukkan Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <span
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <Button
+              type="submit"
+              variant="accent"
+              className="w-full py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors justify-center"
+              onClick={undefined}
+              disabled={loading}
+            >
+              {" "}
+              <Text weight="bold" size="lg" color="white">
+                {" "}
+                {loading ? "Memproses..." : "Daftar"}
+              </Text>
+            </Button>
+          </div>
+
+          <div className="mt-6 text-center">
+            <Text size="sm" fontFamily="sans" weight="normal">
+              Belum punya akun?{" "}
+              <a href="/register" className="text-[#050557] hover:underline">
+                Register
+              </a>
+            </Text>
+          </div>
+        </div>
+        {/* <div className="p-6 md:p-8">
           <div className="flex justify-center mb-6">
             <Logo width={150} height={150} />
           </div>
@@ -110,7 +203,7 @@ export default function LoginForm() {
               {loading ? "Memproses..." : "Masuk"}
             </Button>
           </div>
-        </div>
+        </div> */}
       </form>
     </div>
   );

@@ -78,21 +78,15 @@ export async function fetchUserInfo(userId: string) {
   }
 }
 
-// Fungsi untuk Create Transaction (Checkout)
-// export async function createTransaction(data: {
-//   ticketTypeId: number;
-//   promotionCode?: string;
-//   voucherCode?: string;
-//   usePoint?: boolean;
-// }) {
-//   try {
-//     const response = await api.post("/api/transactions", data);
-//     return response.data.detail;
-//   } catch (error) {
-//     console.error("Failed to create transaction:", error);
-//     throw error;
-//   }
-// }
+export const createEvent = async (formData: FormData) => {
+  const token = localStorage.getItem("token");
+  const response = await api.post("/api/create-event", formData, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data;
+};
 
 export const createTransaction = async (data: any) => {
   const token = localStorage.getItem("token"); // atau dari context/auth hook

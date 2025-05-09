@@ -4,7 +4,7 @@ export interface Ticket {
   price: string | number | null;
   quantity: string | number;
   description?: string;
-  isFree?: boolean;
+  isFree: boolean;
 }
 
 export interface Voucher {
@@ -20,18 +20,32 @@ export interface Voucher {
   maxUses?: string | number;
 }
 
-export interface EventFormData {
-  banner: File | string | null;
+// types/event-form.ts
+export type Promotion = {
+  title: string;
+  code: string;
+  amount: number;
+  startDate: string;
+  endDate: string;
+};
+
+export type EventFormData = {
+  banner: string | File | null;
   name: string;
-  title?: string;
   category: string;
   startDate: string;
   endDate: string;
   startTime: string;
   endTime: string;
   location: string;
-  ticketType: "free" | "paid";
-  tickets: Ticket[];
-  vouchers: Voucher[];
+  ticketType: string;
+  tickets: {
+    id: string;
+    name: string;
+    quantity: string;
+    price: string;
+    isFree: boolean;
+  }[];
+  promotions: Promotion[]; // ✅ Tambahkan ini
   description: string;
-}
+};

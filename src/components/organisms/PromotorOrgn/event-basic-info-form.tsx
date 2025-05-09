@@ -1,10 +1,12 @@
 "use client";
 
+import type React from "react";
+
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { FormField } from "@/components/molecules/PromotorComp/form-field";
-import { FormSectionHeader } from "@/components/molecules/PromotorComp/form-section-header";
 import { Calendar, Clock, MapPin, ImageIcon } from "lucide-react";
+import { FormSectionHeader } from "@/components/molecules/PromotorComp/form-section-header";
+import { FormField } from "@/components/molecules/PromotorComp/form-field";
 
 // Event category options
 const categories = [
@@ -26,8 +28,6 @@ interface EventBasicInfoFormProps {
     category: string;
     startDate: string;
     endDate: string;
-    startTime: string;
-    endTime: string;
     location: string;
   };
   onChange: (field: string, value: any) => void;
@@ -184,45 +184,6 @@ export function EventBasicInfoForm({
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent pl-10"
             />
             <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </FormField>
-      </div>
-
-      {/* Event Time */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <FormField
-          label="Waktu Mulai"
-          htmlFor="startTime"
-          required
-          error={errors.startTime}
-        >
-          <div className="relative">
-            <input
-              type="time"
-              id="startTime"
-              value={formData.startTime}
-              onChange={(e) => onChange("startTime", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent pl-10"
-            />
-            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          </div>
-        </FormField>
-
-        <FormField
-          label="Waktu Berakhir"
-          htmlFor="endTime"
-          required
-          error={errors.endTime}
-        >
-          <div className="relative">
-            <input
-              type="time"
-              id="endTime"
-              value={formData.endTime}
-              onChange={(e) => onChange("endTime", e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#86e64c] focus:border-transparent pl-10"
-            />
-            <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           </div>
         </FormField>
       </div>
