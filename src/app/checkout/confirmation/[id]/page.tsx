@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Upload, ChevronUp, ChevronDown } from "lucide-react";
 import { CheckoutTemplate } from "@/components/templates/checkout-template";
+import { getTransactionById, uploadPaymentProof } from "@/lib/api/axios";
 
 export default function ConfirmationPage({
   params,
@@ -29,15 +30,9 @@ export default function ConfirmationPage({
   const [showDetails, setShowDetails] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
 
-  const [eventData, setEventData] = useState({
-    id: params.id,
-    title: "Hearts2Hearts The Chase",
-    date: "25 Apr - 25 Apr 2025",
-    location: "Gelora Bung Karno",
-    price: 210000,
-    image: "/placeholder.svg?height=300&width=800",
-  });
+  const [eventData, setEventData] = useState<any>(null);
 
   // Calculate payment deadline
   const currentDate = new Date();
@@ -46,26 +41,45 @@ export default function ConfirmationPage({
     paymentDeadline.getHours()
   ).padStart(2, "0")}:${String(paymentDeadline.getMinutes()).padStart(2, "0")}`;
 
-  // Calculate prices
-  const ticketPrice = eventData.price * quantity;
-  const adminFee = 2000;
-  const totalPrice = ticketPrice + adminFee - pointsUsed - voucherDiscount;
+  // Fetch transaction
+  useEffect(() => {
+    const fetchTransaction = async () => {
+      const transactionId = Number(searchParams.get("transactionId"));
+      if (!transactionId || isNaN(transactionId)) {
+        console.error("Invalid transaction ID:", transactionId);
+        return;
+      }
+      try {
+        const data = await getTransactionById(transactionId);
+        console.log("Fetched transaction:", data);
+        setEventData(data.event);
+        setTotalPrice(data.totalPrice);
+      } catch (err: any) {
+        console.error(
+          "Gagal memuat data transaksi:",
+          err.response?.data || err
+        );
+      }
+    };
+
+    fetchTransaction();
+  }, [searchParams]);
 
   // Countdown timer
   useEffect(() => {
     const timer = setInterval(() => {
       if (seconds > 0) {
-        setSeconds(seconds - 1);
+        setSeconds((prev) => prev - 1);
       } else if (minutes > 0) {
-        setMinutes(minutes - 1);
+        setMinutes((prev) => prev - 1);
         setSeconds(59);
       } else if (hours > 0) {
-        setHours(hours - 1);
+        setHours((prev) => prev - 1);
         setMinutes(59);
         setSeconds(59);
       } else {
         clearInterval(timer);
-        // Handle expired timer
+        // Handle timeout, e.g., redirect or show message
       }
     }, 1000);
 
@@ -87,22 +101,31 @@ export default function ConfirmationPage({
     }
   };
 
-  const handlePaymentComplete = () => {
+  const handlePaymentComplete = async () => {
     if (!selectedFile) {
       alert("Mohon upload bukti pembayaran terlebih dahulu");
       return;
     }
 
-    // In a real app, we would submit the payment proof to an API
-    alert("Pembayaran berhasil! Tiket akan dikirim ke email Anda.");
-    router.push("/");
+    try {
+      await uploadPaymentProof({
+        transactionId: Number(searchParams.get("transactionId")),
+        file: selectedFile,
+      });
+
+      alert("Pembayaran berhasil! Tiket akan dikirim ke email Anda.");
+      router.push("/");
+    } catch (error: any) {
+      console.error("Upload gagal:", error);
+      alert("Gagal mengunggah bukti pembayaran. Silakan coba lagi.");
+    }
   };
 
   return (
     <CheckoutTemplate
       currentStep={3}
-      eventImageUrl={eventData.image}
-      eventTitle={eventData.title}
+      eventImageUrl={eventData?.imageUrl}
+      eventTitle={eventData?.title}
     >
       {/* Countdown and Payment Info */}
       <div className="max-w-3xl mx-auto">
@@ -147,7 +170,9 @@ export default function ConfirmationPage({
 
             <div className="mb-2">
               <p className="text-sm text-gray-500 mb-1">Total Pembayaran</p>
-              <p className="font-bold">Rp {totalPrice.toLocaleString()}</p>
+              <p className="font-bold">
+                Rp {totalPrice?.toLocaleString?.() || "-"}
+              </p>
             </div>
 
             <button
@@ -167,14 +192,7 @@ export default function ConfirmationPage({
                 <div className="flex justify-between">
                   <span className="text-sm">Harga Tiket</span>
                   <span className="text-sm">
-                    Rp {ticketPrice.toLocaleString()}
-                  </span>
-                </div>
-
-                <div className="flex justify-between">
-                  <span className="text-sm">Biaya Admin</span>
-                  <span className="text-sm">
-                    Rp {adminFee.toLocaleString()}
+                    Rp {totalPrice.toLocaleString()}
                   </span>
                 </div>
 

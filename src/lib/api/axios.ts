@@ -78,15 +78,21 @@ export async function fetchUserInfo(userId: string) {
   }
 }
 
-export const createEvent = async (formData: FormData) => {
-  const token = localStorage.getItem("token");
-  const response = await api.post("/api/create-event", formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  return response.data;
-};
+// Fungsi untuk Create Transaction (Checkout)
+// export async function createTransaction(data: {
+//   ticketTypeId: number;
+//   promotionCode?: string;
+//   voucherCode?: string;
+//   usePoint?: boolean;
+// }) {
+//   try {
+//     const response = await api.post("/api/transactions", data);
+//     return response.data.detail;
+//   } catch (error) {
+//     console.error("Failed to create transaction:", error);
+//     throw error;
+//   }
+// }
 
 export const createTransaction = async (data: any) => {
   const token = localStorage.getItem("token"); // atau dari context/auth hook
@@ -117,6 +123,21 @@ export const fetchProfileInfo = async () => {
   return response.data.detail;
 };
 
+export const getTransactionById = async (transactionId: number) => {
+  const token = localStorage.getItem("token"); // atau dari auth context/hook
+  console.log("GET transactionId:", transactionId);
+  console.log("Authorization token:", token);
+  const response = await axios.get(
+    `http://localhost:3000/api/transactions/${transactionId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+  return response.data.data;
+};
+
 export const getUserProfile = async () => {
   const { isAuthenticated } = useAuth();
   const token = localStorage.getItem("token"); // Ambil token dari localStorage
@@ -136,6 +157,32 @@ export const getUserProfile = async () => {
     console.error("Error fetching user profile:", error);
     throw error; // Agar error dapat ditangani lebih lanjut
   }
+};
+
+export const uploadPaymentProof = async ({
+  transactionId,
+  file,
+}: {
+  transactionId: number;
+  file: File;
+}) => {
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await axios.post(
+    `http://localhost:3000/api/transactions/${transactionId}/payment-proof`,
+    formData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response.data;
 };
 
 // 🔹 Fungsi Get User
