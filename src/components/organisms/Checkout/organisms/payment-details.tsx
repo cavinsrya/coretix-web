@@ -3,8 +3,8 @@ import { NavigationButtons } from "@/components/molecules/Checkout/molecules/nav
 
 interface PaymentDetailsProps {
   ticketPrice: number;
-  adminFee: number;
-  pointsDiscount: number;
+  usePoints: boolean;
+  pointsUsed: number;
   voucherDiscount: number;
   customVoucherDiscount: number;
   totalPrice: number;
@@ -15,8 +15,8 @@ interface PaymentDetailsProps {
 
 export function PaymentDetails({
   ticketPrice,
-  adminFee,
-  pointsDiscount,
+  usePoints,
+  pointsUsed,
   voucherDiscount,
   customVoucherDiscount,
   totalPrice,
@@ -30,21 +30,16 @@ export function PaymentDetails({
 
       <div className="space-y-2 mb-4">
         <PaymentSummaryItem label="Harga Tiket" amount={ticketPrice} />
-        <PaymentSummaryItem label="Biaya Admin" amount={adminFee} />
 
-        {pointsDiscount > 0 && (
-          <PaymentSummaryItem
-            label="Point"
-            amount={pointsDiscount}
-            isDiscount
-          />
+        {pointsUsed > 0 && (
+          <PaymentSummaryItem label="Point" amount={pointsUsed} usePoints />
         )}
 
         {voucherDiscount > 0 && (
           <PaymentSummaryItem
             label="Voucher"
             amount={voucherDiscount}
-            isDiscount
+            usePoints
           />
         )}
 
@@ -52,7 +47,7 @@ export function PaymentDetails({
           <PaymentSummaryItem
             label="Voucher Kustom"
             amount={customVoucherDiscount}
-            isDiscount
+            usePoints
           />
         )}
       </div>

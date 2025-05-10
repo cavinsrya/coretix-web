@@ -38,6 +38,7 @@ export default function PersonalInfoPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [usePoints, setUsePoints] = useState(false);
+  const [userPoints, setUserPoints] = useState<number>(0);
   const [showVoucherModal, setShowVoucherModal] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<AppliedVoucher | null>(
     null
@@ -57,8 +58,6 @@ export default function PersonalInfoPage() {
     ticketTypes: [],
     promotions: [],
   });
-
-  const [userPoints, setUserPoints] = useState<number>(0);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -94,7 +93,6 @@ export default function PersonalInfoPage() {
   const ticketPrice = selectedTicketType
     ? selectedTicketType.price * quantity
     : 0;
-  const adminFee = 2000;
   const pointsDiscount = usePoints ? userPoints : 0;
   const voucherDiscount = selectedVoucher
     ? eventData.promotions.find((v: any) => v.code === selectedVoucher)
@@ -104,20 +102,19 @@ export default function PersonalInfoPage() {
     ? appliedCustomVoucher.discount
     : 0;
   const totalPrice =
-    ticketPrice +
-    adminFee -
-    pointsDiscount -
-    voucherDiscount -
-    customVoucherDiscount;
+    ticketPrice - pointsDiscount - voucherDiscount - customVoucherDiscount;
 
   const handleContinue = async () => {
     try {
       const response = await createTransaction({
         userId: userId as number,
         ticketTypeId: selectedTicketType?.id,
-
-        usePoint: usePoints,
+        promotionCode: selectedVoucher?.code || undefined, // atau pakai kode khusus jika berbeda
+        voucherCode: appliedCustomVoucher?.code || undefined,
+        usePoints: usePoints,
       });
+
+      console.log(usePoints);
 
       toast.success("Transaksi berhasil dibuat!");
       router.push(
@@ -131,6 +128,7 @@ export default function PersonalInfoPage() {
   };
   console.log("point", usePoints);
   console.log("ticketype", selectedTicketType);
+  console.log("total", totalPrice);
 
   const handleSelectVoucher = (code: string | null) => {
     if (!code) {
@@ -159,6 +157,7 @@ export default function PersonalInfoPage() {
           <TicketDetails
             eventTitle={eventData.title}
             eventDate={eventData.date}
+            eventImage={eventData.imageUrl}
             ticketPrice={ticketPrice / quantity}
             quantity={quantity}
           />
@@ -183,8 +182,8 @@ export default function PersonalInfoPage() {
 
           <PaymentDetails
             ticketPrice={ticketPrice}
-            adminFee={adminFee}
-            pointsDiscount={pointsDiscount}
+            usePoints={usePoints}
+            pointsUsed={pointsDiscount}
             voucherDiscount={voucherDiscount}
             customVoucherDiscount={customVoucherDiscount}
             totalPrice={totalPrice}

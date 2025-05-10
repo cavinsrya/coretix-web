@@ -94,7 +94,13 @@ export async function fetchUserInfo(userId: string) {
 //   }
 // }
 
-export const createTransaction = async (data: any) => {
+export const createTransaction = async (data: {
+  userId: number;
+  ticketTypeId: number;
+  usePoints?: boolean;
+  promotionCode?: string;
+  voucherCode?: string;
+}) => {
   const token = localStorage.getItem("token"); // atau dari context/auth hook
   const response = await axios.post(
     "http://localhost:3000/api/transactions",
